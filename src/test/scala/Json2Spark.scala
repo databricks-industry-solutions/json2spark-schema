@@ -1,4 +1,4 @@
-package com.databricks.labs.json2spark
+package com.databricks.industry.solutions.json2spark
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest._

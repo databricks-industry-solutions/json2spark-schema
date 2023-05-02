@@ -1,4 +1,4 @@
-package com.databricks.labs.json2spark
+package com.databricks.industry.solutions.json2spark
 
 import org.apache.spark.sql.types._
 import io.circe._, io.circe.parser._
