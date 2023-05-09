@@ -62,6 +62,14 @@ class Json2SparkTest extends AnyFunSuite{
 
     assert(a.toSet == b.toSet)
   }
+
+  test("Test creating all FHIR dependencies"){
+
+  }
+
+  test("Test circular references"){
+    //TODO 
+  }
 }
 
 
