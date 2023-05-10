@@ -108,14 +108,14 @@ class Json2Spark(rawJson: String,
      }
   }
 
-
-    /*
-     * Find circular references of a given resource
-     */
+  /*
+   * Find circular references of a given resource
+   */
   def isSelfReference(resourcePath: String): Seq[String] = {
     val c = cursorAt(resourcePath)
     c.downField("properties").keys.getOrElse(Seq.empty).map(fieldName => c.downField("properties").downField(fieldName).downField("items").downField("$ref").as[String].getOrElse("")).filter(path => path == resourcePath).toSeq
   }
+
 
   /*
    * Return relevant struct for object referenced 
@@ -136,7 +136,10 @@ class Json2Spark(rawJson: String,
   }
 
   def property2Struct(c: ACursor, fieldName: String, path: String, requiredFields: Option[Seq[String]] = None): Seq[StructField] = {
-//    println("path: " + path)
+    if(path.size > 1000){
+      println("path: " + path)
+      return Nil
+    }
     c.keys match {
       case Some(x) if isCircularReference(c) =>  Nil 
       case Some(x) if x.toSeq.contains("const") => Nil //const not supported in spark schema
