@@ -62,6 +62,37 @@ class Json2SparkTest extends AnyFunSuite{
 
     assert(a.toSet == b.toSet)
   }
+
+  test("Test creating all FHIR dependencies"){
+    val y = new Json2Spark(Json2Spark.file2String("src/test/scala/resources/fhir.schema.json"),
+      defsLocation="definitions",
+      enforceRequiredField=false)
+
+    //All definitions in FHIR as a list
+    val keys = y.json.hcursor.downField("definitions").keys.getOrElse(Seq.empty)
+
+    //All FHIR resource types as a list
+    val v = y.json.hcursor.downField("oneOf").values.getOrElse(Seq.empty)
+
+    //Dependencies that are circular and must be exluded from the schema
+    val circularRefs = { keys.map(z => y.isSelfReference("#/definitions/" + y)).filter(!_.isEmpty).flatMap(z => z).toSeq :+ "#/definitions/ResourceList" :+ "#/definitions/CodeableConcept" :+ "#/definitions/Reference" :+ "#/definitions/EvidenceVariable_Characteristic" :+ "#/definitions/ExampleScenario_Step"}
+
+    //
+    val x = new Json2Spark(Json2Spark.file2String("src/test/scala/resources/fhir.schema.json"),
+      defsLocation="definitions",
+      enforceRequiredField=false,
+      circularReferences=Some(circularRefs))
+
+    v.toSeq.map(x => x.hcursor).map(c => c.downField("$ref").as[String].getOrElse("")).map(str => Map[String, StructType](str.split("/").last -> new StructType(x.defs(str.split("/").last).toArray)))
+ 
+    //save results for later... in a file, just showing an example here of getting the schema in json format
+    val ex = v.toSeq.map(x => x.hcursor).map(c => c.downField("$ref").as[String].getOrElse("")).map(str => Map[String, StructType](str.split("/").last -> new StructType(x.defs(str.split("/").last).toArray))).last
+    ex.values.head.prettyJson
+  }
+
+  test("Test circular references"){
+    //TODO 
+  }
 }
 
 
