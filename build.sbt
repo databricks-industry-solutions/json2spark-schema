@@ -35,7 +35,7 @@ lazy val core = (project in file("."))
     version := "0.0.1",
     scalacOptions += "-target:jvm-1.8",
     libraryDependencies ++= coreDependencies ++ projectDependencies ,
-    assemblyJarName := s"${name.value}-${version.value}_assembly.jar"
+    assemblyJarName := s"${name.value}-${version.value}_assembly.jar",
     artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
       s"${name.value}-${version.value}." + artifact.extension
     }
