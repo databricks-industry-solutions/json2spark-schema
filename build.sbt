@@ -29,6 +29,12 @@ lazy val projectDependencies = Seq(
   "io.circe" %% "circe-parser" % circeVersion,
 )
 
+//Spark+cats compatibility issues https://github.com/typelevel/cats/issues/3628
+assembly / assemblyShadeRules := Seq(
+  ShadeRule.rename("shapeless.**" -> "new_shapeless.@1").inAll,
+  ShadeRule.rename("cats.kernel.**" -> s"new_cats.kernel.@1").inAll
+)
+
 lazy val core = (project in file("."))
   .settings(
     name := "json2spark-schema",
