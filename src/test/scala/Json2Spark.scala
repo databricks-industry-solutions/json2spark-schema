@@ -87,7 +87,7 @@ class Json2SparkTest extends AnyFunSuite{
  
     //save results for later... in a file, just showing an example here of getting the schema in json format
     val ex = v.toSeq.map(x => x.hcursor).map(c => c.downField("$ref").as[String].getOrElse("")).map(str => Map[String, StructType](str.split("/").last -> new StructType(x.defs(str.split("/").last).toArray))).last
-    ex.values.head.prettyJson
+    //ex.values.head.prettyJson
   }
 
   test("Test circular references"){
@@ -95,25 +95,3 @@ class Json2SparkTest extends AnyFunSuite{
   }
 }
 
-
-/*
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.{SparkSession, Row}
-import org.apache.spark.sql.types._
-import com.databricks.labs.json2spark._
-
-//val spark = SparkSession.builder().master("local[2]").config("spark.driver.bindAddress","127.0.0.1").getOrCreate()
-
-
-import spark.implicits._
-
-
-val x = new Json2Spark(Json2Spark.file2String("src/test/scala/resources/fhir.schema.json"), 
-	defsLocation="definitions", 
-	enforceRequiredField=false,
-	circularReferences=Some(Seq("#/definitions/Extension", "#/definitions/Element", "#/definitions/Identifier", "#/definitions/Period","#/definitions/Reference")))
-
-val s = new StructType(x.defs("Patient").toArray)
-
-val s = new StructType(x.defs("HumanName").toArray) 
- */
