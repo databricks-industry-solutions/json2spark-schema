@@ -4,9 +4,6 @@ import org.apache.spark.sql.types._
 import io.circe._, io.circe.parser._
 import scala.reflect.runtime.universe._
 
-/*
- * 
- */
 object Json2Spark{
 
   /*
@@ -78,8 +75,7 @@ class Json2Spark(rawJson: String,
   enforceRequiredField: Boolean = true,
   defaultType: String = "string",
   defsLocation: String = "$def",
-  circularReferences: Option[Seq[String]] = None ){
-
+  circularReferences: Option[Seq[String]] = None){
 
   /*
    * Schema as a json object
