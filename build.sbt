@@ -1,7 +1,5 @@
 lazy val scala212 = "2.12.8"
-lazy val scala211 = "2.11.12"
 lazy val sparkVersion = sys.env.getOrElse("SPARK_VERSION", "3.3.0")
-lazy val publishVersion = "0.1.0"
 
 ThisBuild / scalaVersion := sys.env.getOrElse("SCALA_VERSION", scala212)
 ThisBuild / organization := "com.databricks"
@@ -37,6 +35,7 @@ lazy val core = (project in file("."))
     version := "0.0.1",
     scalacOptions += "-target:jvm-1.8",
     libraryDependencies ++= coreDependencies ++ projectDependencies ,
+    assemblyJarName := s"${name.value}-${version.value}_assembly.jar",
     artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
       s"${name.value}-${version.value}." + artifact.extension
     }
