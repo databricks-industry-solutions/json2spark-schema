@@ -31,7 +31,7 @@
 # MAGIC %sh -e
 # MAGIC #Download to DBFS storage
 # MAGIC mkdir -p /dbfs/databricks-industry-solutions/json2spark-schema/
-# MAGIC wget https://github.com/databricks-industry-solutions/json2spark-schema/releases/download/v0.0.1/json2spark-schema-0.0.1.jar -O /dbfs/databricks-industry-solutions/json2spark-schema/json2spark-schema-0.0.1.jar
+# MAGIC wget https://github.com/databricks-industry-solutions/json2spark-schema/releases/download/v0.0.1/json2spark-schema-0.0.1_assembly.jar -O /dbfs/databricks-industry-solutions/json2spark-schema/json2spark-schema-0.0.1_assembly.jar
 
 # COMMAND ----------
 
@@ -63,7 +63,7 @@ job_json = {
                 },
                 "libraries": [
                     {
-                        "jar": "dbfs:/databricks-industry-solutions/json2spark-schema/json2spark-schema-0.0.1.jar"
+                        "jar": "dbfs:/databricks-industry-solutions/json2spark-schema/json2spark-schema-0.0.1_assembly.jar"
                     }
                 ],
                 "depends_on": [
@@ -99,7 +99,3 @@ job_json = {
 dbutils.widgets.dropdown("run_job", "False", ["True", "False"])
 run_job = dbutils.widgets.get("run_job") == "True"
 NotebookSolutionCompanion().deploy_compute(job_json, run_job=run_job)
-
-# COMMAND ----------
-
-
