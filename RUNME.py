@@ -1,5 +1,5 @@
 # Databricks notebook source
-# MAGIC %md This notebook sets up the companion cluster(s) to run the solution accelerator. It also creates the Workflow to illustrate the order of execution. Happy exploring! 
+# MAGIC %md This notebook sets up the companion cluster(s) to run the solution accelerator on a Databricks Workspace. It also creates the Workflow to illustrate the order of execution. Happy exploring! 
 # MAGIC 🎉
 # MAGIC 
 # MAGIC **Steps**
@@ -28,34 +28,14 @@
 
 # COMMAND ----------
 
-from solacc.companion import NotebookSolutionCompanion
+# MAGIC %sh -e
+# MAGIC #Download to DBFS storage
+# MAGIC mkdir -p /dbfs/databricks-industry-solutions/hls-payer-mrf-sparkstreaming/
+# MAGIC wget https://github.com/databricks-industry-solutions/hls-payer-mrf-sparkstreaming/releases/download/0.3.5v/payer-mrf-streamsource-0.3.5.jar -O /dbfs/databricks-industry-solutions/hls-payer-mrf-sparkstreaming/payer-mrf-streamsource-0.3.5.jar
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC Before setting up the rest of the accelerator, we need set up a few credentials in order to access ____. Grab ___ key for your ___ account ([documentation](https://www.kaggle.com/docs/api#getting-started-installation-&-authentication) here). Here we demonstrate using the [Databricks Secret Scope](https://docs.databricks.com/security/secrets/secret-scopes.html) for credential management. 
-# MAGIC 
-# MAGIC Copy the block of code below, replace the name the secret scope and fill in the credentials and execute the block. After executing the code, The accelerator notebook will be able to access the credentials it needs.
-# MAGIC 
-# MAGIC 
-# MAGIC ```
-# MAGIC client = NotebookSolutionCompanion().client
-# MAGIC try:
-# MAGIC   client.execute_post_json(f"{client.endpoint}/api/2.0/secrets/scopes/create", {"scope": "solution-accelerator-cicd"})
-# MAGIC except:
-# MAGIC   pass
-# MAGIC client.execute_post_json(f"{client.endpoint}/api/2.0/secrets/put", {
-# MAGIC   "scope": "solution-accelerator-cicd",
-# MAGIC   "key": "kaggle_username",
-# MAGIC   "string_value": "____"
-# MAGIC })
-# MAGIC 
-# MAGIC client.execute_post_json(f"{client.endpoint}/api/2.0/secrets/put", {
-# MAGIC   "scope": "solution-accelerator-cicd",
-# MAGIC   "key": "kaggle_key",
-# MAGIC   "string_value": "____"
-# MAGIC })
-# MAGIC ```
+from solacc.companion import NotebookSolutionCompanion
 
 # COMMAND ----------
 
@@ -64,39 +44,50 @@ job_json = {
         "max_concurrent_runs": 1,
         "tags": {
             "usage": "solacc_testing",
-            "group": "SOLACC"
+            "group": "HLS"
         },
         "tasks": [
             {
-                "job_cluster_key": "sample_solacc_cluster",
+                "job_cluster_key": "payer_mrf_cluster",
+                "libraries": [],
                 "notebook_task": {
-                    "notebook_path": f"00_[PLEASE READ] Contributing to Solution Accelerators"
+                    "notebook_path": f"00_README"
                 },
-                "task_key": "sample_solacc_01"
+                "task_key": "payer_mrf_00",
+                "description": ""
             },
-            # {
-            #     "job_cluster_key": "sample_solacc_cluster",
-            #     "notebook_task": {
-            #         "notebook_path": f"02_Analysis"
-            #     },
-            #     "task_key": "sample_solacc_02",
-            #     "depends_on": [
-            #         {
-            #             "task_key": "sample_solacc_01"
-            #         }
-            #     ]
-            # }
+            {
+                "job_cluster_key": "payer_mrf_cluster",
+                "notebook_task": {
+                    "notebook_path": f"01_payer_mrf_demo"
+                },
+                "libraries": [
+                    {
+                        "jar": "dbfs:/databricks-industry-solutions/hls-payer-mrf-sparkstreaming/payer-mrf-streamsource-0.3.5.jar"
+                    }
+                ],
+                "depends_on": [
+                    {
+                        "task_key": "payer_mrf_00"
+                    }
+                ],
+                "task_key": "payer_mrf_01",
+                "description": ""
+            }
         ],
         "job_clusters": [
             {
-                "job_cluster_key": "sample_solacc_cluster",
+                "job_cluster_key": "payer_mrf_cluster",
                 "new_cluster": {
-                    "spark_version": "11.3.x-cpu-ml-scala2.12",
+                    "spark_version": "10.4.x-scala2.12",
                 "spark_conf": {
-                    "spark.databricks.delta.formatCheck.enabled": "false"
+                    "spark.rpc.message.maxSize": "1024",
+                    "spark.driver.cores": "3", # 1 reader, 1 offset writer, 1 for spark tasks
+                    "spark.executor.cores": "2",
+                    "spark.executor.instances": "4"
                     },
-                    "num_workers": 2,
-                    "node_type_id": {"AWS": "i3.xlarge", "MSA": "Standard_DS3_v2", "GCP": "n1-highmem-4"},
+                    "num_workers": 4,
+                    "node_type_id": {"AWS": "i3.xlarge", "MSA": "Standard_L4s", "GCP": "n1-highmem-4"},
                     "custom_tags": {
                         "usage": "solacc_testing"
                     },
@@ -107,14 +98,10 @@ job_json = {
 
 # COMMAND ----------
 
-spark.sql(f"CREATE DATABASE IF NOT EXISTS databricks_solacc LOCATION '/databricks_solacc/'")
-spark.sql(f"CREATE TABLE IF NOT EXISTS databricks_solacc.dbsql (path STRING, id STRING, solacc STRING)")
-dbsql_config_table = "databricks_solacc.dbsql"
+dbutils.widgets.dropdown("run_job", "False", ["True", "False"])
+run_job = dbutils.widgets.get("run_job") == "True"
+NotebookSolutionCompanion().deploy_compute(job_json, run_job=run_job)
 
 # COMMAND ----------
 
-dbutils.widgets.dropdown("run_job", "False", ["True", "False"])
-run_job = dbutils.widgets.get("run_job") == "True"
-nsc = NotebookSolutionCompanion()
-nsc.deploy_compute(job_json, run_job=run_job)
-_ = nsc.deploy_dbsql("./dashboards/IoT Streaming SA Anomaly Detection.dbdash", dbsql_config_table, spark)
+

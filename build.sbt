@@ -34,6 +34,11 @@ lazy val projectDependencies = Seq(
 lazy val core = (project in file("."))
   .settings(
     name := "json2spark-schema",
+    version := "0.0.1",
     scalacOptions += "-target:jvm-1.8",
     libraryDependencies ++= coreDependencies ++ projectDependencies ,
+    artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
+      s"${name.value}-${version.value}." + artifact.extension
+    }
   )
+

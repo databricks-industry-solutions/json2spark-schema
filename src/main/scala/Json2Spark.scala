@@ -1,20 +1,21 @@
-package com.databricks.labs.json2spark
+package com.databricks.industry.solutions.json2spark
 
 import org.apache.spark.sql.types._
 import io.circe._, io.circe.parser._
 import scala.reflect.runtime.universe._
 
-/*
- * Main entry point
- */
 object Json2Spark{
 
+  /*
+   * Given a file path, convert the file resource to a string
+   */ 
   def file2String(fqPath: String): String = {
     scala.io.Source.fromFile(fqPath).mkString
   }
 
   /*
-   * A list of required fields, None otherwise
+   * Given a curosr location, return  list of required fields, 
+   *   The "required" key is located at each level of a json object. If missing or empty None is returned
    */
   def requiredFields(c: ACursor): Option[Seq[String]] = {
     c.downField("required").as[Seq[String]] match {
@@ -24,7 +25,7 @@ object Json2Spark{
   }
 
   /*
-   * Returns current path of cursor in Json schema
+   * Returns current path of cursor in a Json schema
    */
   def cursorPath(c: ACursor): String = {
     c.key match {
@@ -37,7 +38,7 @@ object Json2Spark{
   /*
    * Metadata is the full path of the cursor(lineage).
    *  In Spark's ArrayType, this cannot be populated and therefore must be maintained from the parent
-   *    e.g. why we need to pass in additional param (a) to maintain lineage
+   *    e.g. why we need to pass in additional param to maintain lineage inside a json resource
    */
   def metadata(path: String, description: String=""): Metadata = {
     Metadata.fromJson("""
@@ -48,6 +49,9 @@ object Json2Spark{
       """)
   }
 
+  /*
+   * Mapping json simple datatypes to spark datatypes
+   */
   val TypeMapping = Map(
     "string" -> StringType,
     "decimal" -> DecimalType,
@@ -60,12 +64,18 @@ object Json2Spark{
 }
 
 
+/*
+ * Representing a parser as
+ *  @param rawJson, the json represented as a string to convert to a spark schema
+ *  @param enforceRequiredField, enforce all required fields from the json schema in the conversion
+ *  @param defaultType, is a dataType cannot be matched or converted it will be created as this dataType
+ *  @param circularReferences, if there are self referencing types, populate this field with their path to avoid further expansions (and out of memory errors)
+ */
 class Json2Spark(rawJson: String,
   enforceRequiredField: Boolean = true,
   defaultType: String = "string",
   defsLocation: String = "$def",
-  circularReferences: Option[Seq[String]] = None ){
-
+  circularReferences: Option[Seq[String]] = None){
 
   /*
    * Schema as a json object
@@ -75,15 +85,13 @@ class Json2Spark(rawJson: String,
     case Right(v) => v
   }
 
-
   /*
-   * Find circular references given a resource
+   * Function that returns all keys at a given path 
    */
-  def circularReferences(resourcePath: String, visitedNodes: Seq[String]) = Seq[String]{
-    val c = cursorAt(resourcePath)
-
-    ???
+  def keys(resourcePath: String): Seq[String] = {
+    cursorAt(resourcePath).keys.getOrElse(Seq.empty).toSeq
   }
+
 
   /*
    * See if the specified field name is required
@@ -96,6 +104,13 @@ class Json2Spark(rawJson: String,
      }
   }
 
+  /*
+   * Find circular references of a given resource
+   */
+  def isSelfReference(resourcePath: String): Seq[String] = {
+    val c = cursorAt(resourcePath)
+    c.downField("properties").keys.getOrElse(Seq.empty).map(fieldName => c.downField("properties").downField(fieldName).downField("items").downField("$ref").as[String].getOrElse("")).filter(path => path == resourcePath).toSeq
+  }
 
 
   /*
@@ -117,6 +132,10 @@ class Json2Spark(rawJson: String,
   }
 
   def property2Struct(c: ACursor, fieldName: String, path: String, requiredFields: Option[Seq[String]] = None): Seq[StructField] = {
+    if(path.size > 1000){
+      println("path: " + path)
+      return Nil
+    }
     c.keys match {
       case Some(x) if isCircularReference(c) =>  Nil 
       case Some(x) if x.toSeq.contains("const") => Nil //const not supported in spark schema
@@ -203,6 +222,9 @@ class Json2Spark(rawJson: String,
     }
   }
 
+  /*
+   * Place the cursor at a specific location. Assuming starts with "#"
+   */
   def cursorAt(path: String): ACursor = {
     var c = json.hcursor.asInstanceOf[ACursor]
     for ( y <- path.split('/').drop(1) ) c = c.downField(y)
@@ -214,8 +236,16 @@ class Json2Spark(rawJson: String,
    *  (only supporting local refs now, e.g. begins with #
    */
   def refs(resourcePath: String, basePath: String, fieldName: String): Seq[StructField] = {
-    val c = cursorAt(resourcePath)
-    property2Struct(c, fieldName, basePath + "/" + "$ref//" + resourcePath ,Json2Spark.requiredFields(c))
+    resourcePath.startsWith("#") match {
+      case true => //This is a local resource in the same file
+        val c = cursorAt(resourcePath)
+        property2Struct(c, fieldName, basePath + "/" + "$ref//" + resourcePath ,Json2Spark.requiredFields(c))
+      case false => //This is an external resource e.g. file or https (not supporting https right now)
+        val (fileName, location) = (resourcePath.split("#")(0), resourcePath.split("#")(1))
+        //val json = new Json2Spark(Json2Spark.file2String(fileName))
+        val c = cursorAt(location)
+        property2Struct(c, fieldName, basePath + "/file:///" + location)
+    }
   }
 
   /*
