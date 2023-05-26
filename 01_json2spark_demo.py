@@ -137,7 +137,7 @@ df = spark.read.option("multiline", True).schema(patient_schema).json(data)
 
 # COMMAND ----------
 
-df.select('id', 'name.given', 'name.family').distinct().show()
+df.select('id', 'name.given', 'name.family').show()
 
 # COMMAND ----------
 
