@@ -1,4 +1,8 @@
 # Databricks notebook source
+# MAGIC %md # Working with Healthcare FHIR Resources
+
+# COMMAND ----------
+
 # MAGIC %md 
 # MAGIC ## Download FHIR Json Schemas 
 # MAGIC
@@ -90,7 +94,7 @@
 
 # COMMAND ----------
 
-# MAGIC %md # Read data in pyspark using schemas
+# MAGIC %md ## Read data in pyspark using schemas
 
 # COMMAND ----------
 
@@ -134,3 +138,7 @@ df = spark.read.option("multiline", True).schema(patient_schema).json(data)
 # COMMAND ----------
 
 df.select('id', 'name.given', 'name.family').distinct().show()
+
+# COMMAND ----------
+
+# MAGIC %md #Working with Financial Services FIRE resources
