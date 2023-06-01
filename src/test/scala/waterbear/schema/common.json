@@ -1,0 +1,6 @@
+{
+  "name": {
+    "description": "A person name, first or last",
+    "type": "string"
+  }
+}

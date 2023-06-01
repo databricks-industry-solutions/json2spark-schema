@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Unit test schema",
+  "description": "Dummy file resulting in an empty spark schema",
+  "type": "object",
+  "properties": { }
+}
