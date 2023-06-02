@@ -194,4 +194,4 @@ String =
 
 ## Databricks Notebooks Examples
 
-Further examples found in *01_json2spark_demo.py* include samples from Healthcare FHIR (Fast Healthcare Interoperability Resources) and Financial Services FIRE (Financial Regulatory Data Standard) 
+Further examples found in *01_healthcare_FHIR_demo.py* and include samples of using Healthcare FHIR (Fast Healthcare Interoperability Resources).
