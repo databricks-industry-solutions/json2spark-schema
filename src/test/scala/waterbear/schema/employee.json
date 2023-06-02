@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "employee",
+  "description": "Entity describing an employee",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Employee ID",
+      "type": "integer",
+      "minimum": 1
+    },
+    "person": {
+      "description": "Employee personal information",
+      "allOf": [{
+        "$ref": "person.json"
+      }]
+    },
+    "joined_date": {
+      "description": "Employee first day of employment",
+      "type": "string",
+      "format": "date",
+      "min": "2016-01-01"
+    },
+    "high_fives": {
+      "type": "integer",
+      "description": "Number of high fives",
+      "minimum": 1,
+      "maximum": 300
+    },
+    "skills": {
+      "description": "Employee skills",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "SCALA",
+          "PYTHON",
+          "SQL",
+          "R"
+        ]
+      }
+    },
+    "role": {
+      "description": "Employee role",
+      "type": "string",
+      "enum": [
+          "SA",
+          "CSE",
+          "SSA",
+          "RSA"
+        ]
+    }
+  },
+  "required": ["id", "person"]
+}

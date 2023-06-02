@@ -47,7 +47,7 @@
 
 # COMMAND ----------
 
-# DBTITLE 1,Creating a Spark Schema for all 158 FHIR resource types
+# DBTITLE 1,Creating a Spark Schema for all 157 FHIR resource types
 # MAGIC %scala
 # MAGIC //Reload the FHIR resource with circularRefs
 # MAGIC val fhir = new Json2Spark(Json2Spark.file2String(jsonFile), 
@@ -86,11 +86,6 @@
 # MAGIC %sh
 # MAGIC ls -ltr /tmp/spark_schemas 
 # MAGIC mv /tmp/spark_schemas/*json /dbfs/user/hive/warehouse/json2spark-schema/spark_schemas/
-
-# COMMAND ----------
-
-# MAGIC %sh
-# MAGIC ls -ltr /dbfs/user/hive/warehouse/json2spark-schema/spark_schemas/
 
 # COMMAND ----------
 
@@ -137,8 +132,4 @@ df = spark.read.option("multiline", True).schema(patient_schema).json(data)
 
 # COMMAND ----------
 
-df.select('id', 'name.given', 'name.family').distinct().show()
-
-# COMMAND ----------
-
-# MAGIC %md #Working with Financial Services FIRE resources
+df.select('id', 'name.given', 'name.family').show()

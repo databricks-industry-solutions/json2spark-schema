@@ -1,0 +1,93 @@
+{
+   "fields": [
+      {
+         "metadata": {
+            "comment": "Employee ID"
+         },
+         "name": "id",
+         "nullable": false,
+         "type": "integer"
+      },
+      {
+         "metadata": {
+            "comment": "Employee personal information"
+         },
+         "name": "person",
+         "nullable": false,
+         "type": {
+            "fields": [
+               {
+                  "metadata": {
+                     "comment": "A person name, first or last"
+                  },
+                  "name": "first_name",
+                  "nullable": false,
+                  "type": "string"
+               },
+               {
+                  "metadata": {
+                     "comment": "person last name"
+                  },
+                  "name": "last_name",
+                  "nullable": false,
+                  "type": "string"
+               },
+               {
+                  "metadata": {
+                     "comment": "Person birth date"
+                  },
+                  "name": "birth_date",
+                  "nullable": false,
+                  "type": "date"
+               },
+               {
+                  "metadata": {
+                     "comment": "employee nickname"
+                  },
+                  "name": "username",
+                  "nullable": true,
+                  "type": "string"
+               }
+            ],
+            "type": "struct"
+         }
+      },
+      {
+         "metadata": {
+            "comment": "Employee first day of employment"
+         },
+         "name": "joined_date",
+         "nullable": true,
+         "type": "date"
+      },
+      {
+         "metadata": {
+            "comment": "Number of high fives"
+         },
+         "name": "high_fives",
+         "nullable": true,
+         "type": "integer"
+      },
+      {
+         "metadata": {
+            "comment": "Employee skills"
+         },
+         "name": "skills",
+         "nullable": true,
+         "type": {
+            "containsNull": true,
+            "elementType": "string",
+            "type": "array"
+         }
+      },
+      {
+         "metadata": {
+            "comment": "Employee role"
+         },
+         "name": "role",
+         "nullable": true,
+         "type": "string"
+      }
+   ],
+   "type": "struct"
+}

@@ -2,9 +2,10 @@ package com.databricks.industry.solutions.json2spark
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest._
+import scala.util.{Failure, Success, Try}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{SparkSession, Row}
-import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.functions.{col,lit}
 
 
 class Json2SparkTest extends AnyFunSuite{
@@ -24,10 +25,10 @@ class Json2SparkTest extends AnyFunSuite{
   }
 
   test("test creating dataframes and rows"){
-    val spark = SparkSession.builder()
+    val spark = ( SparkSession.builder()
       .master("local[2]")
       .config("spark.driver.bindAddress","127.0.0.1") 
-      .getOrCreate()
+      .getOrCreate() )
 
     val rdd = spark.sparkContext.parallelize(Seq( Seq("apple"), Seq("orange", "blueberry"), Seq("starfruit"), Seq("mango", "strawberry", "apple"))).map(row => Row(row))
     val schema = new Json2Spark(Json2Spark.file2String("src/test/scala/resources/veggies.json")).convert2Spark
@@ -105,3 +106,45 @@ class Json2SparkTest extends AnyFunSuite{
   }
 }
 
+class WaterbearTest extends AnyFunSuite {
+  test("test_invalid_dir"){
+    assertThrows[java.io.FileNotFoundException]{
+      Json2Spark.file2String("src/test/scala/waterbear/data/foobar.json")
+    }
+  }
+  /*
+   * ***Difference with waterbear repo, throw an exception for an empty schema
+   */
+  test("test_invalid_parser_no_schema"){
+    assertThrows[java.lang.UnsupportedOperationException]{
+      new Json2Spark(Json2Spark.file2String("src/test/scala/waterbear/schema/dummy.json")).convert2Spark
+    }
+  }
+
+  test("test_get_field_type"){
+    assert(
+      Json2Spark.TypeMapping.get("string")  == Some(StringType) &&
+        Json2Spark.TypeMapping.get("decimal") == Some(DecimalType) &&
+        Json2Spark.TypeMapping.get("number") == Some(DoubleType) &&
+        Json2Spark.TypeMapping.get("float") == Some(FloatType) &&
+        Json2Spark.TypeMapping.get("integer") == Some( LongType) && 
+        Json2Spark.TypeMapping.get("boolean") == Some(BooleanType) && 
+        Json2Spark.TypeMapping.get("timestamp") == Some(DataTypes.TimestampType) &&
+        Json2Spark.TypeMapping.get("date") == Some(DateType) &&
+        Json2Spark.TypeMapping.get("invalid-value") == None
+    )
+  }
+
+  test("test_schema"){
+    val schema = new Json2Spark(Json2Spark.file2String("src/test/scala/waterbear/schema/employee.json")
+      ,externalRefBaseURI="src/test/scala/waterbear/schema/").convert2Spark
+    val spark = ( SparkSession.builder()
+      .master("local[2]")
+      .config("spark.driver.bindAddress","127.0.0.1")
+      .getOrCreate() )
+    val df = spark.read.format("json").schema(schema).load("src/test/scala/waterbear/data/")
+    assert(df.count == 100)
+    assert(df.filter(df("id") === 2).select("person.first_name").first.mkString == "Garrik")
+    assert(df.filter(df("id") === 2).select("person.last_name").first.mkString == "Berggren")
+  }
+}
