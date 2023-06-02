@@ -59,7 +59,7 @@ job_json = {
             {
                 "job_cluster_key": "json2spark_cluster",
                 "notebook_task": {
-                    "notebook_path": f"01_healthcare_FHIR_demo.py"
+                    "notebook_path": f"01_healthcare_FHIR_demo"
                 },
                 "libraries": [
                     {
