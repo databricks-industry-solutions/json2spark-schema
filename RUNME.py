@@ -31,7 +31,7 @@
 # MAGIC %sh -e
 # MAGIC #Download to DBFS storage
 # MAGIC mkdir -p /dbfs/databricks-industry-solutions/json2spark-schema/
-# MAGIC wget https://github.com/databricks-industry-solutions/json2spark-schema/releases/download/v0.0.1/json2spark-schema-0.0.1_assembly.jar -O /dbfs/databricks-industry-solutions/json2spark-schema/json2spark-schema-0.0.1_assembly.jar
+# MAGIC wget https://github.com/databricks-industry-solutions/json2spark-schema/releases/download/v0.0.2/json2spark-schema-0.0.2_assembly.jar -O /dbfs/databricks-industry-solutions/json2spark-schema/json2spark-schema-0.0.2_assembly.jar
 
 # COMMAND ----------
 
@@ -59,11 +59,11 @@ job_json = {
             {
                 "job_cluster_key": "json2spark_cluster",
                 "notebook_task": {
-                    "notebook_path": f"01_json2spark_demo"
+                    "notebook_path": f"01_healthcare_FHIR_demo.py"
                 },
                 "libraries": [
                     {
-                        "jar": "dbfs:/databricks-industry-solutions/json2spark-schema/json2spark-schema-0.0.1_assembly.jar"
+                        "jar": "dbfs:/databricks-industry-solutions/json2spark-schema/json2spark-schema-0.0.2_assembly.jar"
                     }
                 ],
                 "depends_on": [
