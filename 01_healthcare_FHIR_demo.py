@@ -42,7 +42,7 @@
 # MAGIC val circularRefs = { 
 # MAGIC   keys.map(y => circularDependencies.isSelfReference("#/definitions/" + y))
 # MAGIC     .filter(!_.isEmpty).flatMap(y => y)
-# MAGIC     .toSeq ++ Seq("#/definitions/ResourceList", "#/definitions/CodeableConcept", "#/definitions/Reference", "#/definitions/EvidenceVariable_Characteristic", "#/definitions/ExampleScenario_Step")
+# MAGIC     .toSeq ++ Seq("#/definitions/ResourceList", "#/definitions/Reference", "#/definitions/EvidenceVariable_Characteristic", "#/definitions/ExampleScenario_Step")
 # MAGIC     }
 
 # COMMAND ----------
