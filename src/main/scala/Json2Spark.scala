@@ -138,7 +138,6 @@ class Json2Spark(rawJson: String,
 
   def property2Struct(c: ACursor, fieldName: String, path: String, requiredFields: Option[Seq[String]] = None): Seq[StructField] = {
     c.keys match {
-      case Some(x) if isCircularReference(c) =>  Nil 
       case Some(x) if x.toSeq.contains("const") => Nil //const not supported in spark schema
       case Some(x) if x.toSeq.contains("$ref") => fieldName match {
         case "" => refs( c.downField("$ref").as[String].getOrElse(""), path, fieldName)
@@ -147,7 +146,7 @@ class Json2Spark(rawJson: String,
           case x =>  Seq(StructField(fieldName, StructType(x)))
         }
       }
-      case Some(x) if x.toSeq.contains("enum")  =>
+      case Some(x) if ( x.toSeq.contains("enum")  ||  isCircularReference(c) ) =>
         new StructType()
           .add(fieldName,
             StringType,
