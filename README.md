@@ -10,7 +10,7 @@ The goal of this repo is not to represent every permutation of a json schema -> 
 Built for **Spark 3.3.0 & Scala 2.12** Please make sure your cluster matches these versions
 
 ```scala
-import com.databricks.labs.json2spark._ 
+import com.databricks.industry.solutions.json2spark._
 
 val x = new Json2Spark(Json2Spark.file2String("src/test/scala/resources/address.schema.json"))
 x.convert2Spark
