@@ -123,7 +123,6 @@ class Json2Spark(rawJson: String,
   def convert2Spark: StructType = {
     json.hcursor.downField("properties").keys match {
       case Some(x) =>
-        println("here is x! " + x)
         StructType(
           x.map(fieldName =>
             property2Struct(json.hcursor.downField("properties").downField(fieldName),
