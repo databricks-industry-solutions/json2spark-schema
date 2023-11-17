@@ -191,6 +191,13 @@ String =
 */
 ```
 
+### Saving schema to a file for future use 
+```scala
+val fileName = ??? //add your location here 
+val file = new FileWriter(new File(fileName))
+file.write(x.convert2Spark.prettyJson)
+file.close()
+```
 
 ## Databricks Notebooks Examples
 
