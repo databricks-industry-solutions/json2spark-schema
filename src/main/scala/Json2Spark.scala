@@ -123,6 +123,7 @@ class Json2Spark(rawJson: String,
   def convert2Spark: StructType = {
     json.hcursor.downField("properties").keys match {
       case Some(x) =>
+        println("here is x! " + x)
         StructType(
           x.map(fieldName =>
             property2Struct(json.hcursor.downField("properties").downField(fieldName),
@@ -191,17 +192,21 @@ class Json2Spark(rawJson: String,
             }
           case "object" =>
             new StructType({
-              c.downField("properties").keys match {
-                case Some(x) =>
-                  x.map(fn =>
-                    property2Struct(c.downField("properties").downField(fn),
-                      fn,
-                      path + "/properties/" + fn,
-                      Json2Spark.requiredFields(c)))
-                    .reduce( (a,b) => a ++ b ).toArray
-                case None => throw new Exception("No properties found in json schema nested object path: " + path )
-              }
-            }).fields
+              new StructField(fieldName,
+                new StructType({
+                  c.downField("properties").keys match {
+                    case Some(x) =>
+                      x.map(fn =>
+                        property2Struct(c.downField("properties").downField(fn),
+                          fn,
+                          path + "/properties/" + fn,
+                          Json2Spark.requiredFields(c)))
+                        .reduce( (a,b) => a ++ b ).toArray
+                    case None => throw new Exception("No properties found in json schema nested object path: " + path )
+                  }
+                }) 
+              ) :: Nil}.toArray
+            )
         }
       case Some(x) if x.toSeq.contains("allOf") => //combine all references in a list as a single struct
         val size = c.downField("allOf").focus.flatMap(_.asArray).getOrElse(Vector.empty).size
