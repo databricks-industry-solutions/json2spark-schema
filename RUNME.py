@@ -31,7 +31,7 @@
 # MAGIC %sh -e
 # MAGIC #Download to DBFS storage
 # MAGIC mkdir -p /dbfs/databricks-industry-solutions/json2spark-schema/
-# MAGIC wget https://github.com/databricks-industry-solutions/json2spark-schema/releases/download/v0.0.2/json2spark-schema-0.0.2_assembly.jar -O /dbfs/databricks-industry-solutions/json2spark-schema/json2spark-schema-0.0.2_assembly.jar
+# MAGIC wget https://github.com/databricks-industry-solutions/json2spark-schema/releases/download/v0.0.3/json2spark-schema-0.0.3_assembly.jar -O /dbfs/databricks-industry-solutions/json2spark-schema/json2spark-schema-0.0.3_assembly.jar
 
 # COMMAND ----------
 
@@ -63,7 +63,7 @@ job_json = {
                 },
                 "libraries": [
                     {
-                        "jar": "dbfs:/databricks-industry-solutions/json2spark-schema/json2spark-schema-0.0.2_assembly.jar"
+                        "jar": "dbfs:/databricks-industry-solutions/json2spark-schema/json2spark-schema-0.0.3_assembly.jar"
                     }
                 ],
                 "depends_on": [

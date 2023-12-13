@@ -76,7 +76,7 @@
 # MAGIC
 # MAGIC fhirSchemas.foreach(pair => {
 # MAGIC   val file = new FileWriter(new File("/tmp/spark_schemas/" + pair._1 + ".json"))
-# MAGIC   file.write(pair._2.prettyJson)
+# MAGIC   file.write(pair._2(pair._1).dataType.asInstanceOf[StructType].prettyJson)
 # MAGIC   file.close
 # MAGIC })
 
