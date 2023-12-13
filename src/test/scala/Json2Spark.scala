@@ -44,8 +44,8 @@ class Json2SparkTest extends AnyFunSuite{
       enforceRequiredField=false,
       circularReferences=Some(Seq("#/definitions/Extension", "#/definitions/Element", "#/definitions/Identifier", "#/definitions/Period","#/definitions/Reference")))
 
-    assert(new StructType(x.defs("Patient_Link").toArray).size == 6)
-    val s = new StructType(x.defs("Patient").toArray)
+    assert(new StructType(x.defs("Patient_Link").toArray)("Patient_Link").dataType.asInstanceOf[StructType].size == 6)
+    val s = new StructType(x.defs("Patient").toArray)("Patient").dataType.asInstanceOf[StructType]
     assert(s.fields.size == 35)
     assert(s("id").metadata.getString("path") == "#/definitions/Patient/properties/id/$ref//#/definitions/id")
 
