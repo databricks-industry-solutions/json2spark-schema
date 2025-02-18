@@ -1,11 +1,12 @@
 lazy val scala212 = "2.12.8"
-lazy val sparkVersion = sys.env.getOrElse("SPARK_VERSION", "3.3.0")
+lazy val sparkVersion = sys.env.getOrElse("SPARK_VERSION", "3.5.0")
 
 ThisBuild / scalaVersion := sys.env.getOrElse("SCALA_VERSION", scala212)
 ThisBuild / organization := "com.databricks"
 ThisBuild / organizationName := "Databricks, Inc."
 
 lazy val sparkDependencies = Seq(
+  "com.databricks"    % "databricks-jdbc" % "2.7.1",
   "org.apache.spark" %% "spark-catalyst" % sparkVersion,
   "org.apache.spark" %% "spark-core" % sparkVersion,
   "org.apache.spark" %% "spark-mllib" % sparkVersion,
@@ -38,7 +39,7 @@ assembly / assemblyShadeRules := Seq(
 lazy val core = (project in file("."))
   .settings(
     name := "json2spark-schema",
-    version := "0.0.3",
+    version := "0.0.4",
     scalacOptions += "-target:jvm-1.8",
     libraryDependencies ++= coreDependencies ++ projectDependencies ,
     assemblyJarName := s"${name.value}-${version.value}_assembly.jar",
