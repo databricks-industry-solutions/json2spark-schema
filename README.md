@@ -7,7 +7,7 @@ The goal of this repo is not to represent every permutation of a json schema -> 
 
 ## Running
 
-Built for **Spark 3.3.0 & Scala 2.12** Please make sure your cluster matches these versions
+Latest updated build for **Spark 3.5.0 & Scala 2.12** Please make sure your cluster matches these versions. 
 
 ```scala
 import com.databricks.industry.solutions.json2spark._
