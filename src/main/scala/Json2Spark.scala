@@ -62,6 +62,13 @@ object Json2Spark{
     "timestamp" -> DataTypes.TimestampType,
     "date" -> DateType
   )
+
+  // If path has a cycle in it
+  def pathContainsCycle(path: String): Boolean = {
+    val arr = path.split("\\$ref")
+    val n = arr.size
+    (1 to n-2).map(i => arr(n-i) == arr(n-1)).contains(true)
+  }
 }
 
 
@@ -137,6 +144,7 @@ class Json2Spark(rawJson: String,
   }
 
   def property2Struct(c: ACursor, fieldName: String, path: String, requiredFields: Option[Seq[String]] = None): Seq[StructField] = {
+    if (Json2Spark.pathContainsCycle(path)) return Nil 
     c.keys match {
       case Some(x) if x.toSeq.contains("const") => Nil //const not supported in spark schema
       case Some(x) if x.toSeq.contains("$ref") => fieldName match {
