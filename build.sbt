@@ -39,7 +39,7 @@ assembly / assemblyShadeRules := Seq(
 lazy val core = (project in file("."))
   .settings(
     name := "json2spark-schema",
-    version := "0.0.5",
+    version := "0.0.6",
     scalacOptions += "-target:jvm-1.8",
     libraryDependencies ++= coreDependencies ++ projectDependencies ,
     assemblyJarName := s"${name.value}-${version.value}_assembly.jar",
