@@ -64,10 +64,9 @@ object Json2Spark{
   )
 
   // If path has a cycle in it
-  def pathContainsCycle(path: String): Boolean = {
-    val arr = path.split("\\$ref")
-    val n = arr.size
-    (1 to n-2).map(i => arr(n-i) == arr(n-1)).contains(true)
+  def pathContainsCycle(path: String, maxDepth: Integer = 2): Boolean = {
+    val arr = (path).split("\\$ref")
+    !arr.filter(x => x.split("/").size > 4).map(x => x.split("/")(3) + x.split("/")(4)).groupBy(identity).mapValues(_.size).filter(x => x._2 >= maxDepth).isEmpty
   }
 }
 
@@ -144,7 +143,6 @@ class Json2Spark(rawJson: String,
   }
 
   def property2Struct(c: ACursor, fieldName: String, path: String, requiredFields: Option[Seq[String]] = None): Seq[StructField] = {
-    if (Json2Spark.pathContainsCycle(path)) return Nil 
     c.keys match {
       case Some(x) if x.toSeq.contains("const") => Nil //const not supported in spark schema
       case Some(x) if x.toSeq.contains("$ref") => fieldName match {
@@ -154,7 +152,7 @@ class Json2Spark(rawJson: String,
           case x =>  Seq(StructField(fieldName, StructType(x)))
         }
       }
-      case Some(x) if ( x.toSeq.contains("enum")  ||  isCircularReference(c) ) =>
+      case Some(x) if ( x.toSeq.contains("enum")  ||  isCircularReference(c) || Json2Spark.pathContainsCycle(path)) =>
         new StructType()
           .add(fieldName,
             StringType,
